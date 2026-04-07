@@ -17,13 +17,19 @@ Agent performance problems are almost always **environment problems**, not model
 
 ## Quick Start
 
-### As a Claude Skill
+### As an AI Agent Skill
 
-Drop the `agentic-legibility-score/` folder into `~/.claude/skills/` and ask:
+Drop the `agentic-legibility/` folder into your agent's skill directory and ask:
 
 > "Score this repo on agentic legibility"
 
-Claude will run the scanner, apply the rubric, and produce a full scorecard.
+The agent runs the scanner, reads the repo for qualitative assessment, and produces a full scorecard.
+
+| Agent | Skill Directory |
+|---|---|
+| Claude Code | `~/.claude/skills/` |
+| GitHub Copilot | `~/.copilot/skills/` or workspace `.github/skills/` |
+| Cursor | Project root or `.cursor/skills/` |
 
 ### Standalone Scanner
 
@@ -31,7 +37,7 @@ Claude will run the scanner, apply the rubric, and produce a full scorecard.
 python3 scripts/scan_repo.py /path/to/your/repo
 ```
 
-Outputs JSON with 100+ signals across all 7 scoring categories.
+Outputs JSON with 100+ signals across all 7 scoring categories. The scanner provides a mechanical baseline — pair it with the rubric in `references/scoring-rubric.md` for the full scoring methodology.
 
 ## Scoring Categories
 
@@ -45,7 +51,7 @@ Outputs JSON with 100+ signals across all 7 scoring categories.
 | 6 | **Code Quality Enforcement** | 10 | Are quality gates automated and discoverable? |
 | 7 | **Security & Governance** | 10 | Will it avoid introducing vulnerabilities? |
 
-Plus **±5 qualitative adjustment** for progressive disclosure, tribal knowledge debt, and remediation quality.
+Scores combine a mechanical scanner with an LLM qualitative pass — the agent reads actual file contents and adjusts where the scanner's hardcoded patterns miss non-standard tooling.
 
 ## Grade Scale
 
@@ -77,10 +83,8 @@ Plus **±5 qualitative adjustment** for progressive disclosure, tribal knowledge
 │ 5. Testing & Validation             │  13   │  15   │  ▓▓▓▓▓░  │
 │ 6. Code Quality Enforcement         │   9   │  10   │  ▓▓▓▓▓░  │
 │ 7. Security & Governance            │   6   │  10   │  ▓▓▓▓░░  │
-├─────────────────────────────────────┼───────┼───────┼──────────┤
-│ Qualitative Adjustment              │  +2   │  ±5   │          │
 ╞═════════════════════════════════════╪═══════╪═══════╪══════════╡
-│ TOTAL                               │  74   │  100  │    B     │
+│ TOTAL                               │  72   │  100  │    B     │
 └─────────────────────────────────────┴───────┴───────┴──────────┘
 
 GRADE: B  —  "Solid foundation, but agents still need a guide for complex tasks"
@@ -89,10 +93,10 @@ GRADE: B  —  "Solid foundation, but agents still need a guide for complex task
 ## Project Structure
 
 ```
-agentic-legibility-score/
-├── SKILL.md                        # Agent skill instructions
+agentic-legibility/
+├── SKILL.md                        # Agent skill instructions (two-pass workflow)
 ├── scripts/
-│   └── scan_repo.py                # Automated repository scanner
+│   └── scan_repo.py                # Automated repository scanner (100+ signals)
 ├── references/
 │   └── scoring-rubric.md           # Detailed scoring criteria & rubric
 ├── AGENTS.md                       # Agent guide for this repo (dogfooding!)
@@ -108,7 +112,7 @@ agentic-legibility-score/
 
 2. **Rubric** (`references/scoring-rubric.md`) — Detailed point breakdowns for each category and sub-criterion with full/partial/zero credit definitions.
 
-3. **Skill** (`SKILL.md`) — Instructions for AI agents to combine scanner output with qualitative assessment and produce the formatted scorecard.
+3. **Skill** (`SKILL.md`) — Two-pass workflow: run the scanner for a mechanical baseline, then read the actual repo to adjust scores where hardcoded patterns miss non-standard tooling. Produces a formatted scorecard with per-category deep-dives.
 
 ## What the Scanner Detects
 

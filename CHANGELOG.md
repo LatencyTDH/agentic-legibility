@@ -13,6 +13,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Agent skill (`SKILL.md`) with formatted scorecard output
 - Categories: Bootstrap, Entry Points, Documentation, Architecture, Testing, Code Quality, Security
 - Grade scale A+ through F- with agent capability descriptions
-- Qualitative adjustment system (±5 pts) for factors beyond mechanical detection
+- Two-pass scoring: mechanical scanner baseline + LLM qualitative assessment per category
 - Support for: JavaScript/TypeScript, Python, Rust, Go, Ruby, Java, and more
 - Detection of 15+ linter/formatter configs, 8+ CI systems, 12+ package managers

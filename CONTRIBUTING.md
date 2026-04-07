@@ -27,13 +27,14 @@ To add a new signal:
 
 - Keep criteria objectively measurable where possible
 - Justify point values with real agent failure modes
-- Maintain the total at 100 points (+ ±5 qualitative)
+- Maintain the total at 100 points across the 7 categories
 
 ### Updating the Skill
 
 `SKILL.md` is the agent-facing interface. Changes should:
 
-- Keep the file under 150 lines (context window is a shared resource)
+- Keep it as concise as possible (context window is a shared resource)
+- Preserve the two-pass workflow (scanner baseline → qualitative assessment)
 - Preserve the scorecard output format for consistency
 - Test with an actual AI agent if possible
 

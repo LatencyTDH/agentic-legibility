@@ -19,10 +19,17 @@ This is a **two-pass** process. The scanner catches common mechanical signals, b
 
 ### Step 1: Mechanical Scan (Baseline)
 
-Execute the scanner script against the target repository:
+Execute the scanner script against the target repository. Use whichever invocation matches your setup:
 
 ```bash
-python3 ~/.claude/skills/agentic-legibility-score/scripts/scan_repo.py /path/to/repo
+# If installed as a Claude/Copilot skill
+python3 <skill-directory>/scripts/scan_repo.py /path/to/repo
+
+# If cloned as a standalone repo
+python3 scripts/scan_repo.py /path/to/repo
+
+# If pip-installed
+agentic-legibility-score /path/to/repo
 ```
 
 If no specific repo is given, scan the current workspace root.
