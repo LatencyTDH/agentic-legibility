@@ -5,8 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
-> "Autonomous coding usually fails in boring ways. The model cannot find the setup command. It does not know which folder matters. It cannot tell whether the task is done." — [seand.ai](https://seand.ai/blog/agent-legibility-scoring/)
-
 ---
 
 ## What This Is
@@ -17,19 +15,30 @@ Agent performance problems are almost always **environment problems**, not model
 
 ## Quick Start
 
-### As an AI Agent Skill
+### Install as an AI Agent Skill
 
-Drop the `agentic-legibility/` folder into your agent's skill directory and ask:
+```bash
+npx skills add LatencyTDH/agentic-legibility
+```
+
+Then ask your agent:
 
 > "Score this repo on agentic legibility"
 
 The agent runs the scanner, reads the repo for qualitative assessment, and produces a full scorecard.
+
+<details>
+<summary>Manual install (alternative)</summary>
+
+Clone or copy the `agentic-legibility/` folder into your agent's skill directory:
 
 | Agent | Skill Directory |
 |---|---|
 | Claude Code | `~/.claude/skills/` |
 | GitHub Copilot | `~/.copilot/skills/` or workspace `.github/skills/` |
 | Cursor | Project root or `.cursor/skills/` |
+
+</details>
 
 ### Standalone Scanner
 

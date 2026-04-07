@@ -7,10 +7,6 @@ description: "Score any code repository 0-100 on Agentic Legibility — how effe
 
 Score a repository 0-100 on how effectively AI agents can autonomously operate within it.
 
-## Philosophy
-
-> "Autonomous coding usually fails in boring ways. The model cannot find the setup command. It does not know which folder matters. It cannot tell whether the task is done." — seand.ai
-
 Agent failures are almost always environment failures. This skill evaluates the scaffolding, not the code.
 
 ## Evaluation Workflow
