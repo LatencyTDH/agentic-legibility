@@ -15,7 +15,9 @@ Agent failures are almost always environment failures. This skill evaluates the 
 
 ## Evaluation Workflow
 
-### Step 1: Run the Automated Scanner
+This is a **two-pass** process. The scanner catches common mechanical signals, but it uses hardcoded keywords and patterns that won't match every ecosystem. The second pass — your qualitative assessment — is where you actually read the repo and score what the scanner cannot see.
+
+### Step 1: Mechanical Scan (Baseline)
 
 Execute the scanner script against the target repository:
 
@@ -25,13 +27,36 @@ python3 ~/.claude/skills/agentic-legibility-score/scripts/scan_repo.py /path/to/
 
 If no specific repo is given, scan the current workspace root.
 
-Capture the JSON output — it contains all mechanical signals needed for scoring.
+Capture the JSON output. Treat this as a **starting signal**, not a final score. The scanner checks for common file names, config patterns, and directory conventions — it will miss non-standard setups, custom build systems, alternative tools, and anything that doesn't match its hardcoded patterns.
 
-### Step 2: Score Each Category
+### Step 2: Qualitative Assessment (You Read the Repo)
 
-Read the detailed rubric at `references/scoring-rubric.md` for full criteria.
+This is the critical step. For each category, actually read the relevant files and assess what the scanner missed or misjudged.
 
-Use scanner output + qualitative assessment to score all 7 categories:
+**What to read per category:**
+
+| Category | Read These | What You're Looking For |
+|---|---|---|
+| 1. Bootstrap | README, Makefile/Justfile, any setup script | Are there clear setup instructions even if the tool names are non-standard? |
+| 2. Entry Points | README, build configs, CI files, task runners | Can you identify how to build/test/lint even if it's not npm/make/pytest? |
+| 3. Documentation | README, AGENTS.md, docs/, top-level .md files | Is the content *useful* or just boilerplate? Is there a real map? |
+| 4. Architecture | ARCHITECTURE.md, ADRs, source tree structure | Does the code organization make sense? Are decisions explained? |
+| 5. Testing | Test dirs, CI configs, test framework configs | Are tests meaningful and runnable, not just present? |
+| 6. Code Quality | Linter/formatter configs, pre-commit hooks, CI | Are quality gates actually enforced, not just configured? |
+| 7. Security | .gitignore, CI security steps, dependency management | Is the repo secure by default? |
+
+**Adjustment rules for the second pass:**
+
+- **Upgrade** a category if the scanner missed signals due to non-standard tooling but the capability exists (e.g., `build.zig` instead of `Makefile`, `deno.json` instead of `package.json`, a custom `run.sh` with clear build/test/lint targets)
+- **Upgrade** if file *contents* show quality the scanner can't see (e.g., README has excellent setup docs but uses unfamiliar commands, CI runs extensive checks via a custom script)
+- **Downgrade** if the scanner found files that are actually empty, boilerplate, stale, or misleading (e.g., `CONTRIBUTING.md` that just says "TBD", test files with no assertions, CI that's disabled)
+- **Downgrade** if critical knowledge lives outside the repo (referenced Notion pages, "ask #team-platform on Slack", undocumented env vars)
+
+### Step 3: Compute Final Scores
+
+Read the detailed rubric at `references/scoring-rubric.md` for point breakdowns per sub-criterion.
+
+For each category, combine the mechanical signals (Step 1) with your qualitative assessment (Step 2) to arrive at a final score:
 
 | # | Category | Max | What It Measures |
 |---|---|---|---|
@@ -43,9 +68,9 @@ Use scanner output + qualitative assessment to score all 7 categories:
 | 6 | Code Quality Enforcement | 10 | Are quality gates automated and discoverable? |
 | 7 | Security & Governance | 10 | Will it avoid introducing vulnerabilities? |
 
-Apply qualitative adjustments (±5 pts) per the rubric for factors the scanner cannot detect.
+For each category, note where and why you adjusted from the scanner baseline. Transparency matters — the user should understand what was detected mechanically vs. what you assessed by reading the repo.
 
-### Step 3: Generate the Scorecard
+### Step 4: Generate the Scorecard
 
 Present findings using this exact format:
 
@@ -65,8 +90,6 @@ Present findings using this exact format:
 │ 5. Testing & Validation             │  XX   │  15   │  ▓▓▓▓░░  │
 │ 6. Code Quality Enforcement         │  XX   │  10   │  ▓▓▓▓▓▓  │
 │ 7. Security & Governance            │  XX   │  10   │  ▓▓▓░░░  │
-├─────────────────────────────────────┼───────┼───────┼──────────┤
-│ Qualitative Adjustment              │  ±X   │  ±5   │          │
 ╞═════════════════════════════════════╪═══════╪═══════╪══════════╡
 │ TOTAL                               │  XX   │  100  │    ?     │
 └─────────────────────────────────────┴───────┴───────┴──────────┘
@@ -76,16 +99,23 @@ GRADE: [A+/A/B/C/D/F/F-]  —  "{one-line verdict}"
 
 Use 6-char progress bars: each ▓ = ~17% of category max. Round to nearest block.
 
-### Step 4: Category Deep-Dives
+### Step 5: Category Deep-Dives
 
-For each category, output a findings block:
+For each category, output a findings block showing both mechanical and qualitative signals:
 
 ```
-### {N}. {Category Name} — {score}/{max} ({letter})
+### {N}. {Category Name} — {score}/{max}
+
+🔍 Scanner detected:
+  • {signal from scan_repo.py output}
+  • {signal from scan_repo.py output}
+
+🧠 Qualitative assessment:
+  • {what you found by reading the actual files}
+  • {adjustments made and why — e.g. "Scanner missed build.zig but it clearly documents build/test/lint targets (+3)"}
 
 ✅ What's working:
-  • {signal found}
-  • {signal found}
+  • {strength}
 
 ❌ What's missing:
   • {gap identified} — {why it matters for agents}
@@ -94,7 +124,7 @@ For each category, output a findings block:
   • {specific actionable fix} (est. +X pts)
 ```
 
-### Step 5: Executive Summary
+### Step 6: Executive Summary
 
 Close with:
 

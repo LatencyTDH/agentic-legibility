@@ -143,13 +143,22 @@ Detailed scoring criteria for each category. Each sub-criterion is scored 0 (abs
 
 ---
 
-## Qualitative Adjustments (±5 pts)
+## Qualitative Second Pass
 
-After mechanical scoring, apply qualitative adjustments:
+The scanner uses hardcoded keywords and patterns. It will miss non-standard tooling, custom build systems, and quality that only shows up in file contents. After computing mechanical scores, **read the actual repo** and adjust each category as needed.
 
-- **+3** if documentation reads as a "map" not an "encyclopedia" (progressive disclosure)
-- **+2** if error messages in CI/linters contain remediation instructions
-- **-2** if critical knowledge lives only in external tools (Slack, Google Docs, Notion)
-- **-3** if repo has high "tribal knowledge" dependency (undocumented env setup, magic commands)
-- **+2** if repo has a quality tracking system (QUALITY_SCORE.md or equivalent)
-- **-2** if significant architectural drift visible (inconsistent patterns across codebase)
+### When to Upgrade a Category Score
+
+- Scanner missed signals due to non-standard tooling (e.g., `build.zig` instead of `Makefile`, `deno.json` instead of `package.json`, `Earthfile` instead of `Dockerfile`)
+- File contents show quality the scanner cannot assess (e.g., README uses unfamiliar commands but explains them clearly, CI runs comprehensive checks through a custom script)
+- Documentation reads as a useful "map" with progressive disclosure, not just boilerplate
+- Error messages in CI/linters contain remediation instructions that guide agents
+- Repo has a quality tracking system (QUALITY_SCORE.md or equivalent)
+
+### When to Downgrade a Category Score
+
+- Scanner found files that are actually empty, boilerplate, stale, or misleading (e.g., `CONTRIBUTING.md` that says "TBD", test files with no real assertions, disabled CI)
+- Critical knowledge lives outside the repo (Notion, Slack, Google Docs, tribal knowledge)
+- Undocumented environment variables, magic commands, or setup steps that require asking a human
+- Significant architectural drift — inconsistent patterns suggest no enforced conventions
+- Documentation exists but contradicts actual repo behavior (stale docs are worse than no docs)
