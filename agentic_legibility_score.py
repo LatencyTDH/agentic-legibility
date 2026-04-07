@@ -72,6 +72,18 @@ def glob_find(root: Path, pattern: str, max_depth: int = 4) -> list[str]:
     return results
 
 
+def glob_find_many(root: Path, patterns: list[str], max_depth: int = 4) -> list[str]:
+    """Find files matching multiple glob patterns without duplicates."""
+    results = []
+    seen = set()
+    for pattern in patterns:
+        for path in glob_find(root, pattern, max_depth=max_depth):
+            if path not in seen:
+                seen.add(path)
+                results.append(path)
+    return sorted(results)
+
+
 def read_file_safe(path: Path, max_bytes: int = 50000) -> str:
     """Read file content safely."""
     try:
@@ -80,13 +92,41 @@ def read_file_safe(path: Path, max_bytes: int = 50000) -> str:
         return ""
 
 
+def find_dotnet_test_projects(root: Path) -> list[str]:
+    """Detect common .NET test projects by project references and naming patterns."""
+    project_files = glob_find_many(root, ["*.csproj"], max_depth=5)
+    test_projects = []
+    markers = [
+        "microsoft.net.test.sdk",
+        "xunit",
+        "nunit",
+        "mstest.testframework",
+        "microsoft.testing.platform",
+    ]
+    for project_file in project_files:
+        content = read_file_safe(root / project_file).lower()
+        if any(marker in content for marker in markers) or any(part in project_file.lower() for part in [".test", ".tests"]):
+            test_projects.append(project_file)
+    return sorted(test_projects)
+
+
 def scan_bootstrap(root: Path) -> dict:
     """Category 1: Bootstrap & Environment Setup (15 pts)."""
     signals = {}
 
+    dotnet_solution_files = glob_find_many(root, ["*.sln", "*.slnf"], max_depth=3)
+    dotnet_project_files = glob_find_many(root, ["*.csproj"], max_depth=5)
+    dotnet_lockfiles = glob_find_many(root, ["packages.lock.json", "paket.lock"], max_depth=5)
+
     readme_files = file_exists(root, "README.md", "README.rst", "README.txt", "README")
     signals["readme_exists"] = len(readme_files) > 0
     signals["readme_files"] = readme_files
+    signals["dotnet_solution_files"] = dotnet_solution_files[:10]
+    signals["dotnet_project_files"] = dotnet_project_files[:20]
+    signals["dotnet_lockfiles"] = dotnet_lockfiles[:20]
+    signals["dotnet_global_json"] = len(file_exists(root, "global.json")) > 0
+    signals["nuget_config"] = len(file_exists(root, "NuGet.config", "nuget.config")) > 0
+    signals["directory_packages_props"] = len(file_exists(root, "Directory.Packages.props")) > 0
 
     readme_content = ""
     for readme_file in readme_files:
@@ -117,6 +157,9 @@ def scan_bootstrap(root: Path) -> dict:
         "docker",
         "./gradlew",
         "mvn ",
+        "dotnet ",
+        "msbuild ",
+        "nuget ",
     ]
     signals["readme_has_commands"] = any(keyword in readme_content for keyword in run_keywords)
 
@@ -144,7 +187,7 @@ def scan_bootstrap(root: Path) -> dict:
             "composer.lock",
             "gradle.lockfile",
         )
-    ) > 0
+    ) > 0 or len(dotnet_lockfiles) > 0
     signals["package_manifest"] = len(
         file_exists(
             root,
@@ -161,7 +204,7 @@ def scan_bootstrap(root: Path) -> dict:
             "requirements.txt",
             "Pipfile",
         )
-    ) > 0
+    ) > 0 or len(dotnet_solution_files) > 0 or len(dotnet_project_files) > 0 or signals["directory_packages_props"]
 
     signals["makefile"] = len(file_exists(root, "Makefile", "makefile", "GNUmakefile", "Justfile", "Taskfile.yml")) > 0
 
@@ -171,6 +214,28 @@ def scan_bootstrap(root: Path) -> dict:
 def scan_entry_points(root: Path) -> dict:
     """Category 2: Entry Points & Commands (15 pts)."""
     signals = {}
+
+    signals["has_build_script"] = False
+    signals["has_test_script"] = False
+    signals["has_lint_script"] = False
+    signals["has_format_script"] = False
+    signals["has_dev_script"] = False
+
+    readme_content = ""
+    for readme_file in file_exists(root, "README.md", "README.rst", "README.txt", "README"):
+        readme_content += read_file_safe(root / readme_file).lower()
+
+    dotnet_solution_files = glob_find_many(root, ["*.sln", "*.slnf"], max_depth=3)
+    dotnet_project_files = glob_find_many(root, ["*.csproj"], max_depth=5)
+    dotnet_test_projects = find_dotnet_test_projects(root)
+
+    signals["dotnet_solution_files"] = dotnet_solution_files[:10]
+    signals["dotnet_project_files"] = dotnet_project_files[:20]
+    signals["dotnet_test_projects"] = dotnet_test_projects[:15]
+    signals["readme_has_dotnet_commands"] = any(
+        keyword in readme_content
+        for keyword in ["dotnet restore", "dotnet build", "dotnet test", "dotnet run", "dotnet format"]
+    )
 
     package_json = root / "package.json"
     signals["npm_scripts"] = {}
@@ -218,10 +283,31 @@ def scan_entry_points(root: Path) -> dict:
         recipes = re.findall(r"^([a-zA-Z_][\w-]*)(?:\s|:)", content, re.MULTILINE)
         signals["justfile_recipes"] = recipes[:30]
 
+    signals["has_build_script"] = signals["has_build_script"] or len(dotnet_solution_files) > 0 or len(dotnet_project_files) > 0 or "dotnet build" in readme_content
+    signals["has_test_script"] = signals["has_test_script"] or len(dotnet_test_projects) > 0 or "dotnet test" in readme_content
+    signals["has_lint_script"] = signals["has_lint_script"] or "dotnet format" in readme_content or "stylecop" in readme_content
+    signals["has_format_script"] = signals["has_format_script"] or "dotnet format" in readme_content
+    signals["has_dev_script"] = signals["has_dev_script"] or "dotnet run" in readme_content
+
     ci_files = glob_find(root, "*.yml", max_depth=3) + glob_find(root, "*.yaml", max_depth=3)
     signals["ci_files"] = [
         file_path for file_path in ci_files if any(directory in file_path for directory in [".github/workflows", ".gitlab-ci", ".circleci"])
     ]
+    ci_content = ""
+    for ci_file in signals["ci_files"]:
+        ci_content += read_file_safe(root / ci_file).lower()
+
+    signals["ci_has_build"] = any(keyword in ci_content for keyword in ["build", "compile", "dist", "dotnet build", "msbuild"])
+    signals["ci_has_test"] = any(keyword in ci_content for keyword in ["test", "pytest", "jest", "vitest", "dotnet test", "go test", "cargo test"])
+    signals["ci_has_lint"] = any(keyword in ci_content for keyword in ["lint", "eslint", "ruff", "clippy", "golangci", "dotnet format", "stylecop"])
+    signals["ci_has_format"] = any(keyword in ci_content for keyword in ["format", "fmt", "prettier", "dotnet format"])
+    signals["ci_has_dev"] = any(keyword in ci_content for keyword in ["serve", "start", "dev", "dotnet run"])
+
+    signals["has_build_script"] = signals["has_build_script"] or signals["ci_has_build"]
+    signals["has_test_script"] = signals["has_test_script"] or signals["ci_has_test"]
+    signals["has_lint_script"] = signals["has_lint_script"] or signals["ci_has_lint"]
+    signals["has_format_script"] = signals["has_format_script"] or signals["ci_has_format"]
+    signals["has_dev_script"] = signals["has_dev_script"] or signals["ci_has_dev"]
 
     return signals
 
@@ -353,6 +439,8 @@ def scan_testing(root: Path) -> dict:
     """Category 5: Testing & Validation (15 pts)."""
     signals = {}
 
+    dotnet_test_projects = find_dotnet_test_projects(root)
+
     test_dirs = file_exists(
         root,
         "tests",
@@ -368,12 +456,14 @@ def scan_testing(root: Path) -> dict:
         "integration-tests",
     )
     signals["test_dirs"] = test_dirs
-    signals["has_test_dir"] = len(test_dirs) > 0
+    signals["dotnet_test_projects"] = dotnet_test_projects[:15]
+    signals["has_test_dir"] = len(test_dirs) > 0 or len(dotnet_test_projects) > 0
 
-    test_patterns = ["*test*", "*spec*", "*_test.*", "test_*"]
+    test_patterns = ["*test*", "*Test*", "*Tests*", "*spec*", "*Spec*", "*_test.*", "test_*"]
     test_files = []
     for pattern in test_patterns:
         test_files.extend(glob_find(root, pattern, max_depth=5))
+    test_files.extend(dotnet_test_projects)
     test_files = list(
         set(
             file_path
@@ -411,9 +501,11 @@ def scan_testing(root: Path) -> dict:
     signals["playwright_config"] = len(file_exists(root, "playwright.config.ts", "playwright.config.js")) > 0
     signals["cypress_config"] = len(file_exists(root, "cypress.config.ts", "cypress.config.js", "cypress.json")) > 0
 
+    dotnet_coverage_files = glob_find_many(root, ["*.runsettings", "coverlet.runsettings"], max_depth=5)
     signals["coverage_config"] = len(
         file_exists(root, ".nycrc", ".nycrc.json", ".coveragerc", "codecov.yml", ".codecov.yml", "coverage", ".c8rc.json")
-    ) > 0
+    ) > 0 or len(dotnet_coverage_files) > 0
+    signals["dotnet_coverage_files"] = dotnet_coverage_files[:10]
 
     if signals["ci_configured"]:
         ci_content = ""
@@ -424,9 +516,9 @@ def scan_testing(root: Path) -> dict:
             elif path.is_dir():
                 for workflow_file in glob_find(path, "*.yml") + glob_find(path, "*.yaml"):
                     ci_content += read_file_safe(path / workflow_file).lower()
-        signals["ci_runs_tests"] = any(keyword in ci_content for keyword in ["test", "pytest", "jest", "vitest", "cargo test", "go test"])
-        signals["ci_runs_lint"] = any(keyword in ci_content for keyword in ["lint", "eslint", "ruff", "clippy", "golangci"])
-        signals["ci_runs_typecheck"] = any(keyword in ci_content for keyword in ["typecheck", "type-check", "tsc", "mypy", "pyright"])
+        signals["ci_runs_tests"] = any(keyword in ci_content for keyword in ["test", "pytest", "jest", "vitest", "cargo test", "go test", "dotnet test"])
+        signals["ci_runs_lint"] = any(keyword in ci_content for keyword in ["lint", "eslint", "ruff", "clippy", "golangci", "dotnet format", "stylecop"])
+        signals["ci_runs_typecheck"] = any(keyword in ci_content for keyword in ["typecheck", "type-check", "tsc", "mypy", "pyright", "dotnet build"])
     else:
         signals["ci_runs_tests"] = False
         signals["ci_runs_lint"] = False
@@ -438,6 +530,13 @@ def scan_testing(root: Path) -> dict:
 def scan_code_quality(root: Path) -> dict:
     """Category 6: Code Quality Enforcement (10 pts)."""
     signals = {}
+
+    dotnet_project_files = glob_find_many(root, ["*.csproj"], max_depth=5)
+    dotnet_config_files = [
+        *file_exists(root, "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props"),
+        *dotnet_project_files,
+    ]
+    dotnet_config_content = "".join(read_file_safe(root / config_file).lower() for config_file in dotnet_config_files[:25])
 
     signals["eslint"] = len(
         file_exists(
@@ -456,7 +555,14 @@ def scan_code_quality(root: Path) -> dict:
     signals["ruff"] = len(file_exists(root, "ruff.toml", ".ruff.toml")) > 0
     signals["clippy"] = (root / "Cargo.toml").exists()
     signals["golangci"] = len(file_exists(root, ".golangci.yml", ".golangci.yaml", ".golangci.json")) > 0
-    signals["has_linter"] = any([signals["eslint"], signals["biome"], signals["ruff"], signals["clippy"], signals["golangci"]])
+    signals["stylecop"] = len(file_exists(root, "stylecop.json")) > 0 or "stylecop.analyzers" in dotnet_config_content
+    signals["dotnet_analyzers"] = any(
+        marker in dotnet_config_content
+        for marker in ["microsoft.codeanalysis.netanalyzers", "analysislevel", "enforcecodestyleinbuild", "stylecop.analyzers"]
+    )
+    signals["has_linter"] = any(
+        [signals["eslint"], signals["biome"], signals["ruff"], signals["clippy"], signals["golangci"], signals["stylecop"], signals["dotnet_analyzers"]]
+    )
 
     signals["prettier"] = len(
         file_exists(
@@ -471,7 +577,8 @@ def scan_code_quality(root: Path) -> dict:
         )
     ) > 0
     signals["editorconfig"] = len(file_exists(root, ".editorconfig")) > 0
-    signals["has_formatter"] = signals["prettier"] or signals["biome"] or signals["editorconfig"]
+    signals["dotnet_format"] = signals["editorconfig"] and len(dotnet_project_files) > 0
+    signals["has_formatter"] = signals["prettier"] or signals["biome"] or signals["editorconfig"] or signals["dotnet_format"]
 
     signals["tsconfig"] = len(file_exists(root, "tsconfig.json", "tsconfig.base.json")) > 0
     if signals["tsconfig"]:
@@ -493,7 +600,8 @@ def scan_code_quality(root: Path) -> dict:
             signals["ruff"] = True
             signals["has_linter"] = True
 
-    signals["has_typecheck"] = signals.get("tsconfig", False) or signals["mypy"] or signals["pyright"]
+    signals["nullable_enabled"] = "<nullable>enable</nullable>" in dotnet_config_content
+    signals["has_typecheck"] = signals.get("tsconfig", False) or signals["mypy"] or signals["pyright"] or len(dotnet_project_files) > 0
 
     signals["pre_commit"] = len(file_exists(root, ".pre-commit-config.yaml", ".pre-commit-config.yml")) > 0
     signals["husky"] = len(file_exists(root, ".husky", ".husky/pre-commit")) > 0

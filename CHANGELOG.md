@@ -6,6 +6,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Baseline C#/.NET repository detection for solution files, project manifests, dotnet CLI commands, test projects, and common analyzer signals
+
 ### Fixed
 - Packaging now ships the installable scanner module so the `agentic-legibility-score` CLI works after installation
 - `pyproject.toml` uses SPDX-style license metadata to avoid setuptools deprecation warnings

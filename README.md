@@ -46,7 +46,7 @@ Clone or copy the `agentic-legibility/` folder into your agent's skill directory
 python3 scripts/scan_repo.py /path/to/your/repo
 ```
 
-Outputs JSON with 90+ signals across all 7 scoring categories. The scanner provides a mechanical baseline — pair it with the rubric in `references/scoring-rubric.md` for the full scoring methodology.
+Outputs JSON with 100+ signals across all 7 scoring categories. The scanner provides a mechanical baseline — pair it with the rubric in `references/scoring-rubric.md` for the full scoring methodology.
 
 ## Scoring Categories
 
@@ -124,7 +124,7 @@ agentic-legibility/
 
 ## How It Works
 
-1. **Scanner** (`agentic_legibility_score.py`) — Walks the repo tree and checks 90+ mechanical signals: file existence, config parsing, CI detection, documentation quality metrics, cross-linking, etc.
+1. **Scanner** (`agentic_legibility_score.py`) — Walks the repo tree and checks 100+ mechanical signals: file existence, config parsing, CI detection, documentation quality metrics, cross-linking, and baseline .NET/C# conventions.
 
 2. **Rubric** (`references/scoring-rubric.md`) — Detailed point breakdowns for each category and sub-criterion with full/partial/zero credit definitions.
 
@@ -134,12 +134,12 @@ agentic-legibility/
 
 ## What the Scanner Detects
 
-- **Package manifests** — package.json, pyproject.toml, Cargo.toml, go.mod, and 10+ more
-- **Build/test/lint commands** — npm scripts, Makefile targets, Justfile recipes, CI steps
+- **Package manifests** — package.json, pyproject.toml, Cargo.toml, go.mod, .sln/.csproj, and 10+ more
+- **Build/test/lint commands** — npm scripts, Makefile targets, Justfile recipes, dotnet CLI conventions, CI steps
 - **Documentation** — README quality, AGENTS.md, CONTRIBUTING, docs/ structure, cross-linking
 - **Architecture** — ADRs, design docs, exec plans, quality scores, code organization
-- **Testing** — Test directories, test files, CI pipelines, coverage config, E2E setup
-- **Code quality** — 15+ linter/formatter configs, type checking, pre-commit hooks
+- **Testing** — Test directories, test files, .NET test projects, CI pipelines, coverage config, E2E setup
+- **Code quality** — 15+ linter/formatter configs, .NET analyzers, type checking, pre-commit hooks
 - **Security** — .gitignore coverage, Dependabot/Renovate, CODEOWNERS, security policies
 
 ## Requirements
