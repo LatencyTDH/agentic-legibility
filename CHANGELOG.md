@@ -6,9 +6,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added
-- Baseline C#/.NET repository detection for solution files, project manifests, dotnet CLI commands, test projects, and common analyzer signals
-
 ### Fixed
 - Packaging now ships the installable scanner module so the `agentic-legibility-score` CLI works after installation
 - `pyproject.toml` uses SPDX-style license metadata to avoid setuptools deprecation warnings
@@ -18,6 +15,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - GitHub Actions CI for tests, packaging, and self-scan validation
 - Dependabot configuration for Python and GitHub Actions updates
 - SECURITY.md with a vulnerability reporting path
+
+### Changed
+- Expanded scanner coverage for additional project layouts, command conventions, test-project patterns, and analyzer signals across more ecosystems
 
 ## [1.0.0] - 2026-04-07
 
