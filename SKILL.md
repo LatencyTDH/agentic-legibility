@@ -1,6 +1,6 @@
 ---
 name: agentic-legibility-score
-description: "Score any code repository 0-100 on Agentic Legibility — how effectively autonomous AI agents can navigate, understand, build, test, and contribute to the codebase. Based on seand.ai's Agent Legibility framework and OpenAI's Harness Engineering practices. Use when the user asks to score, evaluate, audit, or assess a repo for agent readiness, agentic legibility, AI-friendliness, or wants to know how well their codebase supports autonomous AI development."
+description: "Score any code repository 0-100 on Agentic Legibility — how effectively autonomous AI agents can navigate, understand, build, test, and contribute to the codebase. Use when the user asks to score, evaluate, audit, or assess a repo for agent readiness, agentic legibility, AI-friendliness, or wants to know how well their codebase supports autonomous AI development."
 ---
 
 # Agentic Legibility Score
