@@ -54,8 +54,14 @@ No dependencies required — standard library only.
 # Test scanner runs without errors
 python3 scripts/scan_repo.py . | python3 -m json.tool
 
+# Run regression tests
+python3 -m unittest discover -s tests -p 'test_*.py'
+
 # Test against a known repo
 python3 scripts/scan_repo.py /path/to/well-known-repo | python3 -m json.tool
+
+# Build the published package and CLI
+python3 -m build
 ```
 
 ## Code Style

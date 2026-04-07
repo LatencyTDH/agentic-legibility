@@ -5,8 +5,10 @@
 ## Repo Map
 
 ```
+agentic_legibility_score.py  → Installable scanner module and CLI entry point
 SKILL.md                     → Agent-facing instructions (two-pass workflow)
-scripts/scan_repo.py         → Automated scanner (Python 3.9+, zero deps)
+scripts/scan_repo.py         → Standalone wrapper for local invocation
+tests/test_scan_repo.py      → Regression tests for scanner behavior and CLI wiring
 references/scoring-rubric.md → Detailed scoring criteria per category
 ```
 
@@ -18,11 +20,18 @@ python3 scripts/scan_repo.py /path/to/repo
 
 # Validate scanner output
 python3 scripts/scan_repo.py . | python3 -m json.tool
+
+# Run regression tests
+python3 -m unittest discover -s tests -p 'test_*.py'
+
+# Build the installable package
+python3 -m build
 ```
 
 ## Architecture
 
 - **Scanner** produces raw JSON signals (pure detection, no scoring logic)
+- **Installable module** is the single source of truth for scanner logic; the `scripts/` wrapper only forwards CLI execution
 - **Rubric** defines how signals map to points (the scoring policy)
 - **SKILL.md** orchestrates the two-pass workflow for AI agents:
   1. Run scanner for mechanical baseline
@@ -37,6 +46,7 @@ This separation means scoring criteria can change without touching the scanner, 
 - All detection uses `file_exists()` or `glob_find()` helpers — no raw `os.path` calls
 - Signals are returned as flat dicts with descriptive boolean/string/list keys
 - No external dependencies — stdlib only
+- Tests use the stdlib `unittest` runner to preserve the zero-dependency promise
 - Total score always sums to 100 across 7 categories
 
 ## When Modifying

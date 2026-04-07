@@ -46,7 +46,7 @@ Clone or copy the `agentic-legibility/` folder into your agent's skill directory
 python3 scripts/scan_repo.py /path/to/your/repo
 ```
 
-Outputs JSON with 100+ signals across all 7 scoring categories. The scanner provides a mechanical baseline — pair it with the rubric in `references/scoring-rubric.md` for the full scoring methodology.
+Outputs JSON with 90+ signals across all 7 scoring categories. The scanner provides a mechanical baseline — pair it with the rubric in `references/scoring-rubric.md` for the full scoring methodology.
 
 ## Scoring Categories
 
@@ -103,25 +103,34 @@ GRADE: B  —  "Solid foundation, but agents still need a guide for complex task
 
 ```
 agentic-legibility/
+├── agentic_legibility_score.py      # Installable Python module and CLI entry point
 ├── SKILL.md                        # Agent skill instructions (two-pass workflow)
 ├── scripts/
-│   └── scan_repo.py                # Automated repository scanner (100+ signals)
+│   └── scan_repo.py                # Standalone wrapper for the scanner CLI
+├── tests/
+│   └── test_scan_repo.py           # Regression tests for packaging and detection
+├── .github/
+│   ├── workflows/ci.yml            # CI: build + test + lint validation
+│   └── dependabot.yml              # Dependency update automation
 ├── references/
 │   └── scoring-rubric.md           # Detailed scoring criteria & rubric
 ├── AGENTS.md                       # Agent guide for this repo (dogfooding!)
 ├── CONTRIBUTING.md                 # How to contribute
 ├── CHANGELOG.md                    # Version history
+├── SECURITY.md                     # Vulnerability reporting policy
 ├── LICENSE                         # MIT
 └── README.md                       # You are here
 ```
 
 ## How It Works
 
-1. **Scanner** (`scripts/scan_repo.py`) — Walks the repo tree and checks 100+ mechanical signals: file existence, config parsing, CI detection, documentation quality metrics, cross-linking, etc.
+1. **Scanner** (`agentic_legibility_score.py`) — Walks the repo tree and checks 90+ mechanical signals: file existence, config parsing, CI detection, documentation quality metrics, cross-linking, etc.
 
 2. **Rubric** (`references/scoring-rubric.md`) — Detailed point breakdowns for each category and sub-criterion with full/partial/zero credit definitions.
 
 3. **Skill** (`SKILL.md`) — Two-pass workflow: run the scanner for a mechanical baseline, then read the actual repo to adjust scores where hardcoded patterns miss non-standard tooling. Produces a formatted scorecard with per-category deep-dives.
+
+4. **Verification harness** (`tests/` + `.github/workflows/ci.yml`) — Confirms the installable CLI, standalone wrapper, and core detection paths keep working.
 
 ## What the Scanner Detects
 

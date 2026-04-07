@@ -4,11 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- Packaging now ships the installable scanner module so the `agentic-legibility-score` CLI works after installation
+- `pyproject.toml` uses SPDX-style license metadata to avoid setuptools deprecation warnings
+
+### Added
+- Regression tests covering core scanner output and CLI wrappers
+- GitHub Actions CI for tests, packaging, and self-scan validation
+- Dependabot configuration for Python and GitHub Actions updates
+- SECURITY.md with a vulnerability reporting path
+
 ## [1.0.0] - 2026-04-07
 
 ### Added
 - Initial release
-- Repository scanner (`scripts/scan_repo.py`) detecting 100+ signals across 7 categories
+- Repository scanner (`scripts/scan_repo.py`) detecting 90+ signals across 7 categories
 - Scoring rubric (`references/scoring-rubric.md`) with full/partial/zero credit definitions
 - Agent skill (`SKILL.md`) with formatted scorecard output
 - Categories: Bootstrap, Entry Points, Documentation, Architecture, Testing, Code Quality, Security
