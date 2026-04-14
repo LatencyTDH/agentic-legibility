@@ -18,14 +18,17 @@ references/scoring-rubric.md → Detailed scoring criteria per category
 # Run scanner
 python3 scripts/scan_repo.py /path/to/repo
 
-# Validate scanner output
-python3 scripts/scan_repo.py . | python3 -m json.tool
-
-# Run regression tests
+# Validate everything locally
+python3 -m ruff check .
 python3 -m unittest discover -s tests -p 'test_*.py'
-
-# Build the installable package
+python3 scripts/scan_repo.py . | python3 -m json.tool > /dev/null
 python3 -m build
+```
+
+Install maintainer-only dev tools with:
+
+```bash
+python3 -m pip install build ruff
 ```
 
 ## Architecture

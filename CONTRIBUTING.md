@@ -46,23 +46,24 @@ To add a new signal:
 python3 scripts/scan_repo.py /path/to/repo
 ```
 
-No dependencies required — standard library only.
+Runtime has no external dependencies — the scanner itself uses the standard library only.
+
+For maintainer workflows, install the lightweight dev tools used in CI:
+
+```bash
+python3 -m pip install build ruff
+```
 
 ### Validating Changes
 
 ```bash
-# Test scanner runs without errors
-python3 scripts/scan_repo.py . | python3 -m json.tool
-
-# Run regression tests
+python3 -m ruff check .
 python3 -m unittest discover -s tests -p 'test_*.py'
-
-# Test against a known repo
-python3 scripts/scan_repo.py /path/to/well-known-repo | python3 -m json.tool
-
-# Build the published package and CLI
+python3 scripts/scan_repo.py . | python3 -m json.tool > /dev/null
 python3 -m build
 ```
+
+These four commands cover linting, tests, self-scan validation, and package build verification without requiring a task runner.
 
 ## Code Style
 

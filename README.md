@@ -1,21 +1,46 @@
 # Agentic Legibility Score
 
+<p align="center">
+  <img src="docs/assets/hero.svg" alt="Agentic Legibility Score preview card showing a repo scored across seven categories" width="100%" />
+</p>
+
 **Score any code repository 0–100 on how effectively AI agents can autonomously operate within it.**
 
+[![CI](https://github.com/LatencyTDH/agentic-legibility/actions/workflows/ci.yml/badge.svg)](https://github.com/LatencyTDH/agentic-legibility/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
----
+Agent failures are usually **environment failures**, not model failures. This project grades the scaffolding around a codebase — setup, commands, docs, tests, quality gates, and security — so you can see where agents will stall before you hand them the keys.
 
-## What This Is
+## Table of Contents
 
-A reusable **AI agent skill** that evaluates how "legible" a codebase is to autonomous coding agents. It produces a detailed scorecard across 7 categories, grades the repo A+ through F-, and gives actionable recommendations to improve agent effectiveness.
+- [Why this exists](#why-this-exists)
+- [30-second quick start](#30-second-quick-start)
+- [What you get](#what-you-get)
+- [Scoring categories](#scoring-categories)
+- [Grade scale](#grade-scale)
+- [Sample output](#sample-output)
+- [How it works](#how-it-works)
+- [Project structure](#project-structure)
+- [What the scanner detects](#what-the-scanner-detects)
+- [Requirements](#requirements)
+- [Sources](#sources)
+- [Contributing](#contributing)
 
-Agent performance problems are almost always **environment problems**, not model problems. This tool evaluates the scaffolding, not the code.
+## Why this exists
 
-## Quick Start
+If you give an agent a repo with hidden setup steps, undocumented commands, weak tests, or ambiguous structure, it does not matter how good the model is — it will waste time guessing.
 
-### Install as an AI Agent Skill
+This project gives you a repeatable way to:
+
+- **Audit a repo before letting agents modify it**
+- **Find the highest-leverage DX fixes** for agent-assisted development
+- **Benchmark progress over time** as you improve documentation and harnesses
+- **Compare repos or codebases** using the same seven-category rubric
+
+## 30-second quick start
+
+### 1) Fastest path: install as an AI agent skill
 
 ```bash
 npx skills add LatencyTDH/agentic-legibility
@@ -23,12 +48,12 @@ npx skills add LatencyTDH/agentic-legibility
 
 Then ask your agent:
 
-> "Score this repo on agentic legibility"
+> Score this repo on agentic legibility
 
 The agent runs the scanner, reads the repo for qualitative assessment, and produces a full scorecard.
 
 <details>
-<summary>Manual install (alternative)</summary>
+<summary>Manual skill install</summary>
 
 Clone or copy the `agentic-legibility/` folder into your agent's skill directory:
 
@@ -40,13 +65,32 @@ Clone or copy the `agentic-legibility/` folder into your agent's skill directory
 
 </details>
 
-### Standalone Scanner
+### 2) Fastest path: run the standalone CLI directly from GitHub
 
 ```bash
+python3 -m pip install "git+https://github.com/LatencyTDH/agentic-legibility.git"
+agentic-legibility-score /path/to/your/repo > legibility.json
+```
+
+This installs an executable CLI without needing to clone the repo first.
+
+### 3) Clone and run locally
+
+```bash
+git clone https://github.com/LatencyTDH/agentic-legibility.git
+cd agentic-legibility
 python3 scripts/scan_repo.py /path/to/your/repo
 ```
 
-Outputs JSON with 100+ signals across all 7 scoring categories. The scanner provides a mechanical baseline — pair it with the rubric in `references/scoring-rubric.md` for the full scoring methodology.
+Want copy-paste workflows for all three paths? See [docs/quickstart.md](docs/quickstart.md).
+
+## What you get
+
+- A **mechanical scanner** that checks 100+ repo signals across 7 categories
+- A **qualitative rubric** for the parts scanners miss
+- An **agent skill** that combines both into a readable scorecard
+- A **zero-runtime-dependency Python CLI** for fast local audits
+- A reusable framework for improving repo readiness for Codex, Claude, Copilot, Cursor, and other coding agents
 
 ## Scoring Categories
 
@@ -76,7 +120,7 @@ Scores combine a mechanical scanner with an LLM qualitative pass — the agent r
 
 ## Sample Output
 
-```
+```text
 ╔══════════════════════════════════════════════════════════════════╗
 ║                  AGENTIC LEGIBILITY SCORECARD                   ║
 ║                       my-project                                ║
@@ -99,38 +143,38 @@ Scores combine a mechanical scanner with an LLM qualitative pass — the agent r
 GRADE: B  —  "Solid foundation, but agents still need a guide for complex tasks"
 ```
 
-## Project Structure
-
-```
-agentic-legibility/
-├── agentic_legibility_score.py      # Installable Python module and CLI entry point
-├── SKILL.md                        # Agent skill instructions (two-pass workflow)
-├── scripts/
-│   └── scan_repo.py                # Standalone wrapper for the scanner CLI
-├── tests/
-│   └── test_scan_repo.py           # Regression tests for packaging and detection
-├── .github/
-│   ├── workflows/ci.yml            # CI: build + test + lint validation
-│   └── dependabot.yml              # Dependency update automation
-├── references/
-│   └── scoring-rubric.md           # Detailed scoring criteria & rubric
-├── AGENTS.md                       # Agent guide for this repo (dogfooding!)
-├── CONTRIBUTING.md                 # How to contribute
-├── CHANGELOG.md                    # Version history
-├── SECURITY.md                     # Vulnerability reporting policy
-├── LICENSE                         # MIT
-└── README.md                       # You are here
-```
-
 ## How It Works
 
 1. **Scanner** (`agentic_legibility_score.py`) — Walks the repo tree and checks 100+ mechanical signals: file existence, config parsing, CI detection, documentation quality metrics, cross-linking, and common build-tool conventions across major ecosystems.
-
 2. **Rubric** (`references/scoring-rubric.md`) — Detailed point breakdowns for each category and sub-criterion with full/partial/zero credit definitions.
-
 3. **Skill** (`SKILL.md`) — Two-pass workflow: run the scanner for a mechanical baseline, then read the actual repo to adjust scores where hardcoded patterns miss non-standard tooling. Produces a formatted scorecard with per-category deep-dives.
-
 4. **Verification harness** (`tests/` + `.github/workflows/ci.yml`) — Confirms the installable CLI, standalone wrapper, and core detection paths keep working.
+
+## Project Structure
+
+```text
+agentic-legibility/
+├── agentic_legibility_score.py      # Installable Python module and CLI entry point
+├── SKILL.md                         # Agent skill instructions (two-pass workflow)
+├── scripts/
+│   └── scan_repo.py                 # Standalone wrapper for the scanner CLI
+├── docs/
+│   ├── quickstart.md                # Copy-paste install and usage paths
+│   └── assets/hero.svg              # Repo hero / social-preview source asset
+├── tests/
+│   └── test_scan_repo.py            # Regression tests for packaging and detection
+├── .github/
+│   ├── workflows/ci.yml             # CI: lint + test + build validation
+│   └── dependabot.yml               # Dependency update automation
+├── references/
+│   └── scoring-rubric.md            # Detailed scoring criteria & rubric
+├── AGENTS.md                        # Agent guide for this repo (dogfooding!)
+├── CONTRIBUTING.md                  # How to contribute
+├── CHANGELOG.md                     # Version history
+├── SECURITY.md                      # Vulnerability reporting policy
+├── LICENSE                          # MIT
+└── README.md                        # You are here
+```
 
 ## What the Scanner Detects
 
@@ -144,7 +188,9 @@ agentic-legibility/
 
 ## Requirements
 
-- **Python 3.9+** (standard library only — zero dependencies)
+- **Python 3.9+**
+- Runtime uses the **standard library only**
+- Maintainer validation uses lightweight dev tools (`ruff`, `build`) documented in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Sources
 
