@@ -40,8 +40,6 @@ This project gives you a repeatable way to:
 
 ## 30-second quick start
 
-### 1) Fastest path: install as an AI agent skill
-
 ```bash
 npx skills add LatencyTDH/agentic-legibility
 ```
@@ -64,25 +62,6 @@ Clone or copy the `agentic-legibility/` folder into your agent's skill directory
 | Cursor | Project root or `.cursor/skills/` |
 
 </details>
-
-### 2) Fastest path: run the standalone CLI directly from GitHub
-
-```bash
-python3 -m pip install "git+https://github.com/LatencyTDH/agentic-legibility.git"
-agentic-legibility-score /path/to/your/repo > legibility.json
-```
-
-This installs an executable CLI without needing to clone the repo first.
-
-### 3) Clone and run locally
-
-```bash
-git clone https://github.com/LatencyTDH/agentic-legibility.git
-cd agentic-legibility
-python3 scripts/scan_repo.py /path/to/your/repo
-```
-
-Want copy-paste workflows for all three paths? See [docs/quickstart.md](docs/quickstart.md).
 
 ## What you get
 
