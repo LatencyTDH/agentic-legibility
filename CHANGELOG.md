@@ -15,9 +15,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - GitHub Actions CI for tests, packaging, and self-scan validation
 - Dependabot configuration for Python and GitHub Actions updates
 - SECURITY.md with a vulnerability reporting path
+- Visual repo hero asset and a docs quickstart page for copy-paste install paths
+- Makefile and EditorConfig for clearer contributor workflows and repo conventions
 
 ### Changed
 - Expanded scanner coverage for additional project layouts, command conventions, test-project patterns, and analyzer signals across more ecosystems
+- README now leads with a sharper value proposition, direct CLI install path, and clearer proof/demo links
+- CI now runs Ruff lint in addition to tests, self-scan validation, and package builds
 
 ## [1.0.0] - 2026-04-07
 

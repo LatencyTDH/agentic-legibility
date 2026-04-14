@@ -7,6 +7,5 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from agentic_legibility_score import main
 
-
 if __name__ == "__main__":
     main()
