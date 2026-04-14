@@ -171,7 +171,6 @@ agentic-legibility/
 ├── AGENTS.md                        # Agent guide for this repo (dogfooding!)
 ├── CONTRIBUTING.md                  # How to contribute
 ├── CHANGELOG.md                     # Version history
-├── Makefile                         # Contributor shortcuts
 ├── SECURITY.md                      # Vulnerability reporting policy
 ├── LICENSE                          # MIT
 └── README.md                        # You are here
@@ -191,7 +190,7 @@ agentic-legibility/
 
 - **Python 3.9+**
 - Runtime uses the **standard library only**
-- Maintainer shortcuts such as `make lint` and `make build` use dev tools (`ruff`, `build`) documented in [CONTRIBUTING.md](CONTRIBUTING.md)
+- Maintainer validation uses lightweight dev tools (`ruff`, `build`) documented in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Sources
 

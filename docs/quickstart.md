@@ -43,12 +43,6 @@ Use this path when you want to inspect or modify the scanner itself.
 git clone https://github.com/LatencyTDH/agentic-legibility.git
 cd agentic-legibility
 python3 -m pip install build ruff
-make validate
-```
-
-If you prefer not to use `make`, the equivalent commands are:
-
-```bash
 python3 -m ruff check .
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m build

@@ -19,9 +19,6 @@ references/scoring-rubric.md → Detailed scoring criteria per category
 python3 scripts/scan_repo.py /path/to/repo
 
 # Validate everything locally
-make validate
-
-# Manual equivalents
 python3 -m ruff check .
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/scan_repo.py . | python3 -m json.tool > /dev/null

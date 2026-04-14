@@ -16,7 +16,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Dependabot configuration for Python and GitHub Actions updates
 - SECURITY.md with a vulnerability reporting path
 - Visual repo hero asset and a docs quickstart page for copy-paste install paths
-- Makefile and EditorConfig for clearer contributor workflows and repo conventions
+- EditorConfig plus clearer documented contributor validation commands and repo conventions
 
 ### Changed
 - Expanded scanner coverage for additional project layouts, command conventions, test-project patterns, and analyzer signals across more ecosystems

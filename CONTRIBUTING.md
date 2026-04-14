@@ -57,25 +57,13 @@ python3 -m pip install build ruff
 ### Validating Changes
 
 ```bash
-# One-command validation (lint + tests + build + self-scan)
-make validate
-
-# Or run the steps manually
 python3 -m ruff check .
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/scan_repo.py . | python3 -m json.tool > /dev/null
 python3 -m build
 ```
 
-### Helpful Make Targets
-
-```bash
-make lint
-make test
-make build
-make scan-self
-make install-local
-```
+These four commands cover linting, tests, self-scan validation, and package build verification without requiring a task runner.
 
 ## Code Style
 
